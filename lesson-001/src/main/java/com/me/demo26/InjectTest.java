@@ -8,6 +8,9 @@ import com.me.demo26.test12.MainConfig12;
 import com.me.demo26.test13.MainConfig13;
 import com.me.demo26.test14.MainConfig14;
 import com.me.demo26.test15.MainConfig15;
+import com.me.demo26.test18.MainConfig18;
+import com.me.demo26.test18.OrderService;
+import com.me.demo26.test18.UserService;
 import com.me.demo26.test2.MainConfig2;
 import com.me.demo26.test3.MainConfig3;
 import com.me.demo26.test4.MainConfig4;
@@ -147,6 +150,13 @@ public class InjectTest {
         for (String beanName : context.getBeanDefinitionNames()) {
             System.out.println(String.format("%s->%s", beanName, context.getBean(beanName)));
         }
+    }
+
+    @Test
+    public void test18() {
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(MainConfig18.class);
+        System.out.println(context.getBean(UserService.class).getDao());
+        System.out.println(context.getBean(OrderService.class).getDao());
     }
 
 }
