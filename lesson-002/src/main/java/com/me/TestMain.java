@@ -1,6 +1,7 @@
 package com.me;
 
 import com.me.demo1.*;
+import com.me.demo10.Service;
 import com.me.demo6.MySmartInstantiationAwareBeanPostProcessor;
 import com.me.demo6.Person;
 import com.me.demo7.UserModel;
@@ -283,6 +284,41 @@ public class TestMain {
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
         context.register(Bean1.class);
         context.refresh();
+    }
+
+    @Test
+    public void test13() {
+        DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+        AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(Service.class).setInitMethodName("init").getBeanDefinition();
+        factory.registerBeanDefinition("service", beanDefinition);
+        System.out.println(factory.getBean("service"));
+    }
+
+    @Test
+    public void test14() {
+        DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+        factory.addBeanPostProcessor(new BeanPostProcessor() {
+            @Override
+            public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+                System.out.println("postProcessAfterInitialization：" + beanName);
+                return bean;
+            }
+        });
+
+        //下面注册2个String类型的bean
+        factory.registerBeanDefinition("name",
+                BeanDefinitionBuilder.
+                        genericBeanDefinition(String.class).
+                        addConstructorArgValue("公众号：【路人甲Java】").
+                        getBeanDefinition());
+        factory.registerBeanDefinition("personInformation",
+                BeanDefinitionBuilder.genericBeanDefinition(String.class).
+                        addConstructorArgValue("带领大家成为java高手！").
+                        getBeanDefinition());
+        System.out.println("-------输出bean信息---------");
+        for (String beanName : factory.getBeanDefinitionNames()) {
+            System.out.println(String.format("%s->%s", beanName, factory.getBean(beanName)));
+        }
     }
 
 }
