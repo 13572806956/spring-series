@@ -1,13 +1,23 @@
 package com.me;
 
 import com.me.demo1.*;
+import com.me.demo6.MySmartInstantiationAwareBeanPostProcessor;
+import com.me.demo6.Person;
+import com.me.demo7.UserModel;
+import com.me.demo8.AwareBean;
+import com.me.demo9.Bean1;
 import org.junit.Test;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.*;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.annotation.AnnotatedBeanDefinitionReader;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.util.Arrays;
 
@@ -179,4 +189,100 @@ public class TestMain {
             System.out.println("    bean：" + bean);
         }
     }
+
+    @Test
+    public void test8() {
+        DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+        //创建一个SmartInstantiationAwareBeanPostProcessor,将其添加到容器中
+        factory.addBeanPostProcessor(new MySmartInstantiationAwareBeanPostProcessor());
+        factory.registerBeanDefinition("name",
+                BeanDefinitionBuilder.genericBeanDefinition(String.class)
+                        .addConstructorArgValue("路人甲Java")
+                        .getBeanDefinition());
+        factory.registerBeanDefinition("age",
+                BeanDefinitionBuilder.genericBeanDefinition(Integer.class)
+                        .addConstructorArgValue(30)
+                        .getBeanDefinition());
+        factory.registerBeanDefinition("person",
+                BeanDefinitionBuilder.genericBeanDefinition(Person.class).getBeanDefinition());
+        Person person = factory.getBean("person", Person.class);
+        System.out.println(person);
+    }
+
+    @Test
+    public void test9() {
+        DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+        factory.addBeanPostProcessor(new InstantiationAwareBeanPostProcessor() {
+            @Override
+            public boolean postProcessAfterInstantiation(Object bean, String beanName) throws BeansException {
+                if ("user1".equals(beanName)) {
+                    return false;
+                }
+                return true;
+            }
+        });
+        factory.registerBeanDefinition("user1", BeanDefinitionBuilder.
+                genericBeanDefinition(UserModel.class).
+                addPropertyValue("name", "路人甲Java").
+                addPropertyValue("age", 30).
+                getBeanDefinition());
+        factory.registerBeanDefinition("user2", BeanDefinitionBuilder.
+                genericBeanDefinition(UserModel.class).
+                addPropertyValue("name", "刘德华").
+                addPropertyValue("age", 50).
+                getBeanDefinition());
+        for (String beanName : factory.getBeanDefinitionNames()) {
+            System.out.println(String.format("%s->%s", beanName, factory.getBean(beanName)));
+        }
+    }
+
+    @Test
+    public void test10() {
+        DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+        factory.addBeanPostProcessor(new InstantiationAwareBeanPostProcessor() {
+            @Override
+            public PropertyValues postProcessProperties(PropertyValues pvs, Object bean, String beanName) throws BeansException {
+                if ("user1".equals(beanName)) {
+                    if (pvs == null) {
+                        pvs = new MutablePropertyValues();
+                    }
+                    if (pvs instanceof MutablePropertyValues) {
+                        MutablePropertyValues mpvs = (MutablePropertyValues) pvs;
+                        //将姓名设置为：路人
+                        mpvs.add("name", "路人");
+                        //将年龄属性的值修改为18
+                        mpvs.add("age", 18);
+                    }
+                }
+                return null;
+            }
+        });
+        factory.registerBeanDefinition("user1", BeanDefinitionBuilder.
+                genericBeanDefinition(UserModel.class).
+                getBeanDefinition()); //@1
+        factory.registerBeanDefinition("user2", BeanDefinitionBuilder.
+                genericBeanDefinition(UserModel.class).
+                addPropertyValue("name", "刘德华").
+                addPropertyValue("age", 50).
+                getBeanDefinition());
+        for (String beanName : factory.getBeanDefinitionNames()) {
+            System.out.println(String.format("%s->%s", beanName, factory.getBean(beanName)));
+        }
+    }
+
+    @Test
+    public void test11() {
+        DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+        factory.registerBeanDefinition("awareBean", BeanDefinitionBuilder.genericBeanDefinition(AwareBean.class).getBeanDefinition());
+        //调用getBean方法获取bean，将触发bean的初始化
+        factory.getBean("awareBean");
+    }
+
+    @Test
+    public void test12() {
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        context.register(Bean1.class);
+        context.refresh();
+    }
+
 }

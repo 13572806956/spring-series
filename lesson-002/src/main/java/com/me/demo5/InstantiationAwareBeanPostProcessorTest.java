@@ -4,6 +4,8 @@ import com.me.demo1.Car;
 import org.junit.Test;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
 public class InstantiationAwareBeanPostProcessorTest {
@@ -26,6 +28,15 @@ public class InstantiationAwareBeanPostProcessorTest {
                 return null;
             }
         });
+
+        //定义一个car bean,车名为：奥迪
+        AbstractBeanDefinition carBeanDefinition = BeanDefinitionBuilder.
+                genericBeanDefinition(Car.class).
+                addPropertyValue("name", "奥迪").  //@2
+                getBeanDefinition();
+        factory.registerBeanDefinition("car", carBeanDefinition);
+        //从容器中获取car这个bean的实例，输出
+        System.out.println(factory.getBean("car"));
 
 
     }
