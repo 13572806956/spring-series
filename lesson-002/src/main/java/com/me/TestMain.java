@@ -2,6 +2,7 @@ package com.me;
 
 import com.me.demo1.*;
 import com.me.demo10.Service;
+import com.me.demo12.MySmartInitializingSingleton;
 import com.me.demo6.MySmartInstantiationAwareBeanPostProcessor;
 import com.me.demo6.Person;
 import com.me.demo7.UserModel;
@@ -319,6 +320,26 @@ public class TestMain {
         for (String beanName : factory.getBeanDefinitionNames()) {
             System.out.println(String.format("%s->%s", beanName, factory.getBean(beanName)));
         }
+    }
+
+    @Test
+    public void test15() {
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        context.register(MySmartInitializingSingleton.class);
+        System.out.println("开始启动容器!");
+        context.refresh();
+        System.out.println("容器启动完毕!");
+    }
+
+    @Test
+    public void test16() {
+        DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+        factory.registerBeanDefinition("service1", BeanDefinitionBuilder.genericBeanDefinition(Service1.class).getBeanDefinition());
+        factory.registerBeanDefinition("service2", BeanDefinitionBuilder.genericBeanDefinition(Service2.class).getBeanDefinition());
+        factory.registerBeanDefinition("mySmartInitializingSingleton", BeanDefinitionBuilder.genericBeanDefinition(MySmartInitializingSingleton.class).getBeanDefinition());
+        System.out.println("准备触发所有单例bean初始化");
+        //触发所有bean初始化，并且回调 SmartInitializingSingleton#afterSingletonsInstantiated 方法
+        factory.preInstantiateSingletons();
     }
 
 }
