@@ -7,9 +7,9 @@ import org.springframework.cglib.proxy.MethodProxy;
 import java.lang.reflect.Method;
 
 /**
- * @title: CglibTest1
- * @author: GXW
- * @date: 2023/4/25 0:10
+ * @title CglibTest1
+ * @author GXW
+ * @Date 2023/4/25 0:10
  */
 public class CglibTest2 {
     interface IService1 {
